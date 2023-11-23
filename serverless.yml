@@ -56,7 +56,7 @@ functions:
 
 resources:
   Resources:
-    teamDb:
+    noteDb:
       Type: AWS::DynamoDB::Table
       Properties:
         TableName: note-db # Database table name
@@ -65,6 +65,18 @@ resources:
             AttributeType: S # String
         KeySchema:
           - AttributeName: id # database key id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+
+    usersDb:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: accounts
+        AttributeDefinitions:
+          - AttributeName: username
+            AttributeType: S
+        KeySchema:
+          - AttributeName: username
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
 
