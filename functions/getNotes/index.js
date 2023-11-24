@@ -17,8 +17,10 @@ const getNotes = async (event, context) => {
         TableName: "note-db",
         IndexName: "gsi-userId",
         KeyConditionExpression: "userId = :userId",
+        FilterExpression: "isDeleted = :isDeleted",
         ExpressionAttributeValues: {
-          ":userId": event.id
+          ":userId": event.id,
+          ":isDeleted": false,
         }
       })
       .promise();

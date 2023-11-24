@@ -41,6 +41,12 @@ functions:
     - httpApi:
         path: '/api/notes'
         method: DELETE
+  recoverNote:
+    handler: functions/recoverNote/index.handler
+    events:
+    - httpApi:
+        path: '/api/restore'
+        method: POST
   login:
     handler: functions/login/index.handler
     events:

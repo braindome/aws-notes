@@ -22,17 +22,40 @@ const deleteNote = async (event, context) => {
     });
   }
 
-  const params = {
+  // const params = {
+  //   TableName: "note-db", 
+  //   Key: {
+  //     id: noteId,
+  //   },
+  //   UpdateExpression: "set isDeleted = :isDeleted",
+  //   ExpressionAttributeValues: {
+  //     ":isDeleted": true,
+  //   },
+  //   ConditionExpression: "id = :noteId",
+  // };
+
+  const getParams = {
     TableName: "note-db", 
     Key: {
       id: noteId,
+    }
+  };
+
+  const updateParams = {
+    TableName: "note-db", 
+    Key: {
+      id: noteId,
+    },
+    UpdateExpression: "set isDeleted = :isDeleted",
+    ExpressionAttributeValues: {
+      ":isDeleted": true,
     },
   };
 
   try {
 
 
-    const note = await db.get(params).promise();
+    const note = await db.get(getParams).promise();
 
     if (!note.Item) {
       return sendResponse(404, { success: false, message: "Note not found" });
@@ -45,7 +68,8 @@ const deleteNote = async (event, context) => {
       });
     }
 
-    await db.delete({ TableName: "note-db", Key: { id: noteId } }).promise();
+    //await db.delete({ TableName: "note-db", Key: { id: noteId } }).promise();
+    await db.update(updateParams).promise();
 
     return sendResponse(200, { success: true, message: "Note deleted" });
   } catch (error) {
