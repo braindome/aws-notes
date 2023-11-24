@@ -1,7 +1,5 @@
 # notes API
 
-**OBS** Vid inlämning så ska en config fil till insomnia finnas med. I insomnia spara era olika requests till alla olika endpoints, exportera config filen och inkudera den i era projekt
-
 ## Instruktioner
 
 Du ska i denna övning göra ett API för att spara anteckningar. Anteckningarna är kopplade till specifik användare, så det ska bara gå att komma åt anteckningar som är kopplade till den just nu inloggade användaren. Du ska använda middy som middleware för att skydda de endpoints som kräver inloggning.
@@ -35,6 +33,55 @@ Alla endpoints förutom skapa konto och logga in kräver att man är inloggad.
 |`modifiedAt`|`Date`|När anteckningen sist modifierades.|
 |`isDeleted`|`Boolean`|Soft delete function.|
 |`userId`|`String`|Ownership management.|
+
+## Getting started
+
+* Create account: POST request `/api/user/signup`
+```json
+{
+	"username": "phil",
+	"password": "test123",
+	"firstName": "Phil",
+	"lastName": "Leotardo"
+}
+```
+
+* Login: POST request `/api/user/login`
+```json
+{
+	"username": "phil",
+	"password": "test123"
+}
+```
+
+then copy token from response and use it in all other interactions.
+
+* Add a note: POST request, endpoint `/api/notes`
+  ```json
+{
+	"title": "Example title",
+	"text": "Example text"
+}
+```
+
+* Get all of signed in user's notes: GET request, endpoint `/api/notes`. No json body.
+
+* Edit a note: PUT request `/api/notes`
+```json
+  {
+	"id": "c45d3035-dd0f-4cf8-90f2-5a6a7ee4efe5",
+	"title": "Title to edit",
+	"text": "Example text to edit"
+}
+```
+
+* Delete and restore a note: DELETE request `/api/notes` || Restore a previously deleted note: POST request `/api/restore`
+  ```json
+{
+	"id": "c45d3035-dd0f-4cf8-90f2-5a6a7ee4efe5"
+}
+```
+
 
 
 ### Felhantering
