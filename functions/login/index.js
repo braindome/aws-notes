@@ -18,7 +18,6 @@ async function getUser(username) {
       return { success: true, message: "User found!", user: user.Item };
     } else {
       return { success: false, message: "Incorrect username and/or password" };
-      // we don't want to tell the user which one is wrong of the two!
 
     }
   } catch (error) {

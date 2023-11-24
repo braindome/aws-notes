@@ -12,6 +12,8 @@ const editNote = async (event, context) => {
   const { noteId } = event.pathParameters;
   const updateAttributes = JSON.parse(event.body);
 
+  updateAttributes.modifiedAt = new Date().toISOString();
+
   const updateExpression =
     "set " +
     Object.keys(updateAttributes)
