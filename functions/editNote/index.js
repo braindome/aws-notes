@@ -9,9 +9,8 @@ const editNote = async (event, context) => {
     return sendResponse(401, { success: false, message: "Invalid token" });
   }
 
-  //const { noteId } = event.pathParameters;
+  const { noteId } = event.pathParameters;
   const updateAttributes = JSON.parse(event.body);
-  const noteId = updateAttributes.id;
 
   const updateExpression =
     "set " +
@@ -33,7 +32,7 @@ const editNote = async (event, context) => {
     await db
       .update({
         TableName: "note-db",
-        Key: { id: dogId },
+        Key: { id: noteId },
         ReturnValues: "ALL_NEW",
         UpdateExpression: updateExpression,
         ConditionExpression: "id = :noteId",
