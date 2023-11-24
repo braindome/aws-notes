@@ -9,10 +9,17 @@ const getNotes = async (event, context) => {
     return sendResponse(401, { success: false, message: "Invalid token" });
   }
 
+  console.log("Event: ", event)
+
   try {
     const { Items } = await db
-      .scan({
+      .query({
         TableName: "note-db",
+        IndexName: "gsi-userId",
+        KeyConditionExpression: "userId = :userId",
+        ExpressionAttributeValues: {
+          ":userId": event.id
+        }
       })
       .promise();
 

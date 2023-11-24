@@ -16,9 +16,11 @@ const validateToken = {
       request.event.id = data.id;
       request.event.username = data.username;
 
-      request.event.body = JSON.parse(request.event.body);
-      request.event.body.userId = data.id;
-      request.event.body = JSON.stringify(request.event.body);
+      if (request.event.body) {
+        request.event.body = JSON.parse(request.event.body);
+        request.event.body.userId = data.id;
+        request.event.body = JSON.stringify(request.event.body);
+      }
 
       return request.response;
     } catch (error) {
