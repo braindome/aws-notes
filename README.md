@@ -16,12 +16,13 @@ Alla endpoints förutom skapa konto och logga in kräver att man är inloggad.
 
 |Endpoint|Metod|Beskrivning|
 |---|---|---|
-|`/api/notes`|`GET`|Hämta anteckningar|
-|`/api/notes`|`POST`|Spara en anteckning|
-|`/api/notes`|`PUT`|Ändra en anteckning|
-|`/api/notes`|`DELETE`|Ta bort en anteckning|
-|`/api/user/signup`|`POST`|Skapa konto|
-|`/api/user/login`|`POST`|Logga in|
+|`/api/notes`|`GET`|Get notes (belonging to signed in user)|
+|`/api/notes`|`POST`|Post note|
+|`/api/notes`|`PUT`|Edit a note|
+|`/api/notes`|`DELETE`|Delete a note (soft)|
+|`/api/user/signup`|`POST`|Create account|
+|`/api/user/login`|`POST`|Log in|
+|`/api/restore`|`POST`|Restore deleted note|
 
 **Note - objekt**
 
@@ -32,6 +33,8 @@ Alla endpoints förutom skapa konto och logga in kräver att man är inloggad.
 |`text`|`String`|Själva anteckningstexten, max 300 tecken.|
 |`createdAt`|`Date`|När anteckningen skapades.|
 |`modifiedAt`|`Date`|När anteckningen sist modifierades.|
+|`isDeleted`|`Boolean`|Soft delete function.|
+|`userId`|`String`|Ownership management.|
 
 
 ### Felhantering
