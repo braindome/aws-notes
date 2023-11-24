@@ -3,6 +3,10 @@ const jwt = require("jsonwebtoken");
 const validateToken = {
   before: async (request) => {
     try {
+      if (!request.event.headers.authorization.includes("Bearer ")) {
+        throw new Error("Invalid authorization header");
+      }
+
       const token = request.event.headers.authorization.replace("Bearer ", "");
 
       if (!token) throw new Error();
@@ -11,6 +15,11 @@ const validateToken = {
 
       request.event.id = data.id;
       request.event.username = data.username;
+
+      request.event.body = JSON.parse(request.event.body);
+      request.event.body.userId = data.id;
+      request.event.body = JSON.stringify(request.event.body);
+
       return request.response;
     } catch (error) {
       console.error(error);
