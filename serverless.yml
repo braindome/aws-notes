@@ -39,7 +39,7 @@ functions:
     handler: functions/deleteNote/index.handler
     events:
     - httpApi:
-        path: '/api/notes/{noteId}'
+        path: '/api/notes'
         method: DELETE
   login:
     handler: functions/login/index.handler
