@@ -12,9 +12,9 @@ const editNote = async (event, context) => {
   const updateAttributes = JSON.parse(event.body);
   const noteId = updateAttributes.id;
   const title = updateAttributes.title;
-  const text_ = updateAttributes.text_;
+  const text = updateAttributes.text;
 
-  if (!noteId || !title || !text_) {
+  if (!noteId || !title || !text) {
     return sendResponse(400, { success: false, message: "Missing input data" });
   }
 
@@ -24,7 +24,7 @@ const editNote = async (event, context) => {
     "set " +
     Object.keys(updateAttributes)
       .filter((attributeName) => attributeName !== "id")
-      .map((attributeName) => `${attributeName} = :${attributeName}`)
+      .map((attributeName) => `#${attributeName} = :${attributeName}`)
       .join(", ");
 
   const expressionAttributeValues = Object.keys(updateAttributes).reduce(
@@ -33,6 +33,17 @@ const editNote = async (event, context) => {
         values[`:${attributeName}`] = updateAttributes[attributeName];
       }
       return values;
+    },
+    {}
+  );
+
+  const expressionAttributeNames = Object.keys(updateAttributes).reduce(
+    (names, attributeName) => {
+      if (attributeName !== "id") {
+        names[`#${attributeName}`] = attributeName;
+        //names[attributeName] = `#${attributeName}`;
+      }
+      return names;
     },
     {}
   );
@@ -48,6 +59,8 @@ const editNote = async (event, context) => {
 
   try {
     const note = await db.get(params).promise();
+    const conditionExpression = "id = :noteId";
+
 
     if (!note.Item) {
       return sendResponse(404, { success: false, message: "Note not found" });
@@ -66,6 +79,7 @@ const editNote = async (event, context) => {
         Key: { id: noteId },
         ReturnValues: "ALL_NEW",
         UpdateExpression: updateExpression,
+        ExpressionAttributeNames: expressionAttributeNames,
         ConditionExpression: "id = :noteId",
         ExpressionAttributeValues: {
           ...expressionAttributeValues,
