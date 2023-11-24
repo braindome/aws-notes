@@ -19,6 +19,7 @@ const postNote = async (event, context) => {
 
   body.createdAt = createdAt.toISOString();
   body.modifiedAt = modifiedAt.toISOString();
+  body.isDeleted = false;
 
   try {
     await db
