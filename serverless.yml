@@ -33,7 +33,7 @@ functions:
     handler: functions/editNote/index.handler
     events:
     - httpApi:
-        path: '/api/notes/{noteId}'
+        path: '/api/notes'
         method: PUT
   deleteNote:
     handler: functions/deleteNote/index.handler

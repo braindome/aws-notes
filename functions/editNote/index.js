@@ -9,28 +9,57 @@ const editNote = async (event, context) => {
     return sendResponse(401, { success: false, message: "Invalid token" });
   }
 
-  const { noteId } = event.pathParameters;
   const updateAttributes = JSON.parse(event.body);
+  const noteId = updateAttributes.id;
+  const title = updateAttributes.title;
+  const text_ = updateAttributes.text_;
+
+  if (!noteId || !title || !text_) {
+    return sendResponse(400, { success: false, message: "Missing input data" });
+  }
 
   updateAttributes.modifiedAt = new Date().toISOString();
 
   const updateExpression =
     "set " +
     Object.keys(updateAttributes)
+      .filter((attributeName) => attributeName !== "id")
       .map((attributeName) => `${attributeName} = :${attributeName}`)
       .join(", ");
 
   const expressionAttributeValues = Object.keys(updateAttributes).reduce(
     (values, attributeName) => {
-      values[`:${attributeName}`] = updateAttributes[attributeName];
+      if (attributeName !== "id") {
+        values[`:${attributeName}`] = updateAttributes[attributeName];
+      }
       return values;
     },
     {}
   );
 
+  const params = {
+    TableName: "note-db",
+    Key: {
+      id: noteId,
+    },
+  };
+
   expressionAttributeValues[":noteId"] = noteId;
 
   try {
+    const note = await db.get(params).promise();
+
+    if (!note.Item) {
+      return sendResponse(404, { success: false, message: "Note not found" });
+    }
+
+    if (note.Item.userId != event.id) {
+      return sendResponse(404, {
+        success: false,
+        message: "Note does not belong to current user",
+      });
+    }
+
     await db
       .update({
         TableName: "note-db",
@@ -38,7 +67,10 @@ const editNote = async (event, context) => {
         ReturnValues: "ALL_NEW",
         UpdateExpression: updateExpression,
         ConditionExpression: "id = :noteId",
-        ExpressionAttributeValues: expressionAttributeValues,
+        ExpressionAttributeValues: {
+          ...expressionAttributeValues,
+          ":noteId": noteId,
+        },
       })
       .promise();
 
