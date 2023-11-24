@@ -39,28 +39,28 @@ Alla endpoints förutom skapa konto och logga in kräver att man är inloggad.
 * Create account: POST request `/api/user/signup`
 ```json
 {
-	"username": "phil",
-	"password": "test123",
-	"firstName": "Phil",
-	"lastName": "Leotardo"
+  "username": "phil",
+  "password": "test123",
+  "firstName": "Phil",
+  "lastName": "Leotardo"
 }
 ```
 
 * Login: POST request `/api/user/login`
 ```json
 {
-	"username": "phil",
-	"password": "test123"
+  "username": "phil",
+  "password": "test123"
 }
 ```
 
 then copy token from response and use it in all other interactions.
 
 * Add a note: POST request, endpoint `/api/notes`
-  ```json
+```json
 {
-	"title": "Example title",
-	"text": "Example text"
+  "title": "Example title",
+  "text": "Example text"
 }
 ```
 
@@ -69,16 +69,16 @@ then copy token from response and use it in all other interactions.
 * Edit a note: PUT request `/api/notes`
 ```json
   {
-	"id": "c45d3035-dd0f-4cf8-90f2-5a6a7ee4efe5",
-	"title": "Title to edit",
-	"text": "Example text to edit"
+  "id": "c45d3035-dd0f-4cf8-90f2-5a6a7ee4efe5",
+  "title": "Title to edit",
+  "text": "Example text to edit"
 }
 ```
 
 * Delete and restore a note: DELETE request `/api/notes` || Restore a previously deleted note: POST request `/api/restore`
-  ```json
+```json
 {
-	"id": "c45d3035-dd0f-4cf8-90f2-5a6a7ee4efe5"
+  "id": "c45d3035-dd0f-4cf8-90f2-5a6a7ee4efe5"
 }
 ```
 
