@@ -6,32 +6,36 @@ const { validateToken } = require("../middleware/auth");
 const { v4: uuidv4 } = require("uuid");
 
 const postNote = async (event, context) => {
-  const body = JSON.parse(event.body);
-
-  body.id = uuidv4();
 
   if (event?.error && event.error === "401") {
     return sendResponse(401, { success: false, message: "Invalid token" });
   }
 
-  // if (Object.keys(body).length > 2) {
-  //   return sendResponse(400, {
-  //     success: false,
-  //     message: "Too many attributes",
-  //   });
-  // }
+  const body = JSON.parse(event.body);
+  
+  const allowedProperties = ["title", "text"];
+  const additionalProperties = Object.keys(body).filter(
+    (prop) => !allowedProperties.includes(prop)
+  );
 
-  const createdAt = new Date();
-  const modifiedAt = createdAt;
-
-  body.createdAt = createdAt.toISOString();
-  body.modifiedAt = modifiedAt.toISOString();
-  body.isDeleted = false;
+  if (additionalProperties.length > 0) {
+    return sendResponse(400, {
+      success: false,
+      message: "Only 'title' and 'text' are allowed as input properties",
+    });
+  }
 
   if (!body.title || !body.text) {
     return sendResponse(400, {
       success: false,
       message: "You need to input both a title and a text",
+    });
+  }
+
+  if (body.title.length === 0 || body.text.lenth === 0) {
+    return sendResponse(400, {
+      success: false,
+      message: "Not allowed to input empty fields",
     });
   }
 
@@ -49,6 +53,14 @@ const postNote = async (event, context) => {
     });
   }
 
+  const createdAt = new Date();
+  const modifiedAt = createdAt;
+
+  body.id = uuidv4();
+  body.createdAt = createdAt.toISOString();
+  body.modifiedAt = modifiedAt.toISOString();
+  body.isDeleted = false;
+
   try {
     await db
       .put({
@@ -61,7 +73,7 @@ const postNote = async (event, context) => {
   } catch (error) {
     return sendResponse(500, {
       success: false,
-      message: "Could not post note",
+      message: "Could not post note. Check the provided data and try again",
     });
   }
 };
