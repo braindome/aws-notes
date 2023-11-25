@@ -10,12 +10,39 @@ const editNote = async (event, context) => {
   }
 
   const updateAttributes = JSON.parse(event.body);
+  
+  const allowedProperties = ["title", "text", "id"];
+  const additionalProperties = Object.keys(updateAttributes).filter(
+    (prop) => !allowedProperties.includes(prop)
+  );
+
+  if (additionalProperties.length > 0) {
+    return sendResponse(400, {
+      success: false,
+      message: "Only 'title' and 'text' are allowed as input properties",
+    });
+  }
+
+
+
   const noteId = updateAttributes.id;
   const title = updateAttributes.title;
   const text = updateAttributes.text;
 
   if (!noteId || !title || !text) {
     return sendResponse(400, { success: false, message: "Missing input data" });
+  }
+
+  if (title.length === 0 || text.length === 0) {
+    return sendResponse(400, { success: false, message: "Title and text cannot be empty" });
+  }
+
+  if (title.length > 50) {
+    return sendResponse(400, { success: false, message: "Title cannot be longer than 50 characters" });
+  }
+
+  if (text.length > 400) {
+    return sendResponse(400, { success: false, message: "Text cannot be longer than 400 characters" });
   }
 
   updateAttributes.modifiedAt = new Date().toISOString();
