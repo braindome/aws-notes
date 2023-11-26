@@ -3,50 +3,46 @@ const AWS = require("aws-sdk");
 const db = new AWS.DynamoDB.DocumentClient();
 const middy = require("@middy/core");
 const { validateToken } = require("../middleware/auth");
+const { validateInput } = require("../../validation");
 const { v4: uuidv4 } = require("uuid");
 
 const postNote = async (event, context) => {
-
   if (event?.error && event.error === "401") {
     return sendResponse(401, { success: false, message: "Invalid token" });
   }
 
-  const body = JSON.parse(event.body);
-  
-  const allowedProperties = ["title", "text"];
-  const additionalProperties = Object.keys(body).filter(
-    (prop) => !allowedProperties.includes(prop)
-  );
+  const { title, text } = JSON.parse(event.body);
 
-  if (additionalProperties.length > 0) {
+  const validation = validateInput([title, text]);
+  if (!validation.success) {
     return sendResponse(400, {
       success: false,
-      message: "Only 'title' and 'text' are allowed as input properties",
+      message: "Input fields must be strings",
     });
   }
 
-  if (!body.title || !body.text) {
+  if (!title || !text) {
     return sendResponse(400, {
       success: false,
       message: "You need to input both a title and a text",
     });
   }
 
-  if (body.title.length === 0 || body.text.lenth === 0) {
+  if (title.length === 0 || text.lenth === 0) {
     return sendResponse(400, {
       success: false,
       message: "Not allowed to input empty fields",
     });
   }
 
-  if (body.title.length > 50) {
+  if (title.length > 50) {
     return sendResponse(400, {
       success: false,
       message: "Title cannot be longer than 50 chars",
     });
   }
 
-  if (body.text.length > 400) {
+  if (text.length > 400) {
     return sendResponse(400, {
       success: false,
       message: "Text cannot be longer than 400 chars",
@@ -56,10 +52,15 @@ const postNote = async (event, context) => {
   const createdAt = new Date();
   const modifiedAt = createdAt;
 
-  body.id = uuidv4();
-  body.createdAt = createdAt.toISOString();
-  body.modifiedAt = modifiedAt.toISOString();
-  body.isDeleted = false;
+  const body = {
+    id: uuidv4(),
+    title: title,
+    text: text,
+    createdAt: createdAt.toISOString(),
+    modifiedAt: modifiedAt.toISOString(),
+    isDeleted: false,
+    userId: event.id,
+  };
 
   try {
     await db
@@ -69,7 +70,10 @@ const postNote = async (event, context) => {
       })
       .promise();
 
-    return sendResponse(200, { success: true });
+    return sendResponse(200, {
+      success: true,
+      message: "Note posted successfully",
+    });
   } catch (error) {
     return sendResponse(500, {
       success: false,

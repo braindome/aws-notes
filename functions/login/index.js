@@ -3,6 +3,8 @@ const db = new AWS.DynamoDB.DocumentClient();
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { sendResponse } = require("../../responses");
+const { validateInput } = require("../../validation");
+
 
 async function getUser(username) {
   try {
@@ -51,6 +53,15 @@ async function login(username, password) {
 
 exports.handler = async (event, context) => {
   const { username, password } = JSON.parse(event.body);
+
+  const validation = validateInput([username, password]);
+  if (!validation.success) {
+    return sendResponse(400, {
+      success: false,
+      message: "Input fields must be strings",
+    });
+  }
+
   const loginResponse = await login(username, password);
 
   return sendResponse(loginResponse.success ? 200 : 400, loginResponse);
