@@ -25,7 +25,7 @@ const getNotes = async (event, context) => {
       })
       .promise();
 
-    return sendResponse(200, { success: true, notes: Items });
+    return sendResponse(200, { success: true, message: "Items retrieved", notes: Items });
   } catch (error) {
     return sendResponse(400, {
       success: false,

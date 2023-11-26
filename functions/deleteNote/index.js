@@ -3,14 +3,25 @@ const AWS = require("aws-sdk");
 const db = new AWS.DynamoDB.DocumentClient();
 const middy = require("@middy/core");
 const { validateToken } = require("../middleware/auth");
+const { validateInput } = require("../../validation");
+
 
 const deleteNote = async (event, context) => {
   if (event?.error && event.error === "401") {
     return sendResponse(401, { success: false, message: "Invalid token" });
   }
 
-  const body = JSON.parse(event.body);
-  const noteId = body.id;
+
+  const { id } = JSON.parse(event.body);
+
+  const validation = validateInput([id]);
+  if (!validation.success) {
+    return sendResponse(400, {
+      success: false,
+      message: "Input fields must be strings",
+    });
+  }
+  const noteId = id;
 
   console.log("Note ID: ", noteId);
   console.log("Event: ", event);
@@ -22,27 +33,16 @@ const deleteNote = async (event, context) => {
     });
   }
 
-  // const params = {
-  //   TableName: "note-db", 
-  //   Key: {
-  //     id: noteId,
-  //   },
-  //   UpdateExpression: "set isDeleted = :isDeleted",
-  //   ExpressionAttributeValues: {
-  //     ":isDeleted": true,
-  //   },
-  //   ConditionExpression: "id = :noteId",
-  // };
 
   const getParams = {
-    TableName: "note-db", 
+    TableName: "note-db",
     Key: {
       id: noteId,
-    }
+    },
   };
 
   const updateParams = {
-    TableName: "note-db", 
+    TableName: "note-db",
     Key: {
       id: noteId,
     },
@@ -53,8 +53,6 @@ const deleteNote = async (event, context) => {
   };
 
   try {
-
-
     const note = await db.get(getParams).promise();
 
     if (!note.Item) {
@@ -68,7 +66,10 @@ const deleteNote = async (event, context) => {
       });
     }
 
+    // Uncomment to permanently delete
     //await db.delete({ TableName: "note-db", Key: { id: noteId } }).promise();
+
+    // Soft delete
     await db.update(updateParams).promise();
 
     return sendResponse(200, { success: true, message: "Note deleted" });

@@ -3,49 +3,74 @@ const AWS = require("aws-sdk");
 const db = new AWS.DynamoDB.DocumentClient();
 const middy = require("@middy/core");
 const { validateToken } = require("../middleware/auth");
+const { validateInput } = require("../../validation");
+
 
 const editNote = async (event, context) => {
   if (event?.error && event.error === "401") {
     return sendResponse(401, { success: false, message: "Invalid token" });
   }
 
-  const updateAttributes = JSON.parse(event.body);
-  
-  const allowedProperties = ["title", "text", "id"];
-  const additionalProperties = Object.keys(updateAttributes).filter(
-    (prop) => !allowedProperties.includes(prop)
-  );
+  // const updateAttributes = JSON.parse(event.body);
 
-  if (additionalProperties.length > 0) {
+  // const allowedProperties = ["title", "text", "id"];
+  // const additionalProperties = Object.keys(updateAttributes).filter(
+  //   (prop) => !allowedProperties.includes(prop)
+  // );
+
+  // if (additionalProperties.length > 0) {
+  //   return sendResponse(400, {
+  //     success: false,
+  //     message: "Only 'title' and 'text' are allowed as input properties",
+  //   });
+  // }
+
+  // const noteId = updateAttributes.id;
+  // const title = updateAttributes.title;
+  // const text = updateAttributes.text;
+
+  const { id, title, text } = JSON.parse(event.body);
+
+  const validation = validateInput([id, title, text]);
+  if (!validation.success) {
     return sendResponse(400, {
       success: false,
-      message: "Only 'title' and 'text' are allowed as input properties",
+      message: "Input fields must be strings",
     });
   }
 
-
-
-  const noteId = updateAttributes.id;
-  const title = updateAttributes.title;
-  const text = updateAttributes.text;
+  const noteId = id;
 
   if (!noteId || !title || !text) {
     return sendResponse(400, { success: false, message: "Missing input data" });
   }
 
   if (title.length === 0 || text.length === 0) {
-    return sendResponse(400, { success: false, message: "Title and text cannot be empty" });
+    return sendResponse(400, {
+      success: false,
+      message: "Title and text cannot be empty",
+    });
   }
 
   if (title.length > 50) {
-    return sendResponse(400, { success: false, message: "Title cannot be longer than 50 characters" });
+    return sendResponse(400, {
+      success: false,
+      message: "Title cannot be longer than 50 characters",
+    });
   }
 
   if (text.length > 400) {
-    return sendResponse(400, { success: false, message: "Text cannot be longer than 400 characters" });
+    return sendResponse(400, {
+      success: false,
+      message: "Text cannot be longer than 400 characters",
+    });
   }
 
-  updateAttributes.modifiedAt = new Date().toISOString();
+  const updateAttributes = {
+    title: title,
+    text: text,
+    modifiedAt: new Date().toISOString(),
+  }
 
   const updateExpression =
     "set " +
@@ -68,7 +93,6 @@ const editNote = async (event, context) => {
     (names, attributeName) => {
       if (attributeName !== "id") {
         names[`#${attributeName}`] = attributeName;
-        //names[attributeName] = `#${attributeName}`;
       }
       return names;
     },
@@ -86,8 +110,6 @@ const editNote = async (event, context) => {
 
   try {
     const note = await db.get(params).promise();
-    const conditionExpression = "id = :noteId";
-
 
     if (!note.Item) {
       return sendResponse(404, { success: false, message: "Note not found" });
@@ -115,7 +137,7 @@ const editNote = async (event, context) => {
       })
       .promise();
 
-    return sendResponse(200, { success: true });
+    return sendResponse(200, { success: true, message: "Note edited successfully" });
   } catch (error) {
     return sendResponse(500, {
       success: false,

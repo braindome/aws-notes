@@ -1,6 +1,7 @@
 const AWS = require("aws-sdk");
 const { nanoid } = require("nanoid");
 const { sendResponse } = require("../../responses");
+const { validateInput } = require("../../validation");
 const bcrypt = require("bcryptjs");
 const db = new AWS.DynamoDB.DocumentClient();
 
@@ -36,9 +37,7 @@ async function createAccount(
 }
 
 async function signUp(username, password, firstName, lastName) {
-  // check if username already exists
 
-  // if username exists => return {error}
 
   const hashedPassword = await bcrypt.hash(password, 10);
   const userId = nanoid();
@@ -56,7 +55,15 @@ async function signUp(username, password, firstName, lastName) {
 exports.handler = async (event, context) => {
   const { username, password, firstName, lastName } = JSON.parse(event.body);
 
+  const validation = validateInput([username, password, firstName, lastName]);
+  if (!validation.success) {
+    return sendResponse(400, {
+      success: false,
+      message: "Input fields must be strings",
+    });
+  }
+
   const signUpResult = await signUp(username, password, firstName, lastName);
 
-  return sendResponse(signUpResult.success ? 200: 400, signUpResult);
+  return sendResponse(signUpResult.success ? 200 : 400, signUpResult);
 };
