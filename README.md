@@ -10,6 +10,7 @@
 |`/api/user/signup`|`POST`|Create account|
 |`/api/user/login`|`POST`|Log in|
 |`/api/restore`|`POST`|Restore deleted note|
+|`/api/trash`|`GET`|Retrieve a list of deleted notes|
 
 **Note - objekt**
 
@@ -54,6 +55,7 @@ then copy token from response and use it in all other interactions.
 ```
 
 * Get all of signed in user's notes: GET request, endpoint `/api/notes`. No json body.
+* Get a list of deleted notes: GET request, endpoint `/api/trash`. No json body.
 
 * Edit a note: PUT request `/api/notes`
 ```json

@@ -41,6 +41,12 @@ functions:
     - httpApi:
         path: '/api/notes'
         method: DELETE
+  trashBin:
+    handler: functions/trashBin/index.handler
+    events:
+    - httpApi:
+        path: '/api/trash'
+        method: GET
   recoverNote:
     handler: functions/recoverNote/index.handler
     events:
